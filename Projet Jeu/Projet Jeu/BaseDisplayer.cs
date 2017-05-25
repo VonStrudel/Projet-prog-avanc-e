@@ -5,38 +5,22 @@ using System.Text;
 
 namespace Projet_Jeu
 {
-    
-    class Program
-    {
-        static void Main(string[] args)
-        {
-            WorldObject wo = new WorldObject();
-            wo.addListener(dic);
-            wo.addListener(dic);
-        }
-        static void dic(EventRepresenter ev)
-        {
-            Console.WriteLine("a");
-        }
-    }
-
-
-
-    
-
-
-    
-
 
     /*Comportement graphique de l'objet (affichage)*/
     /*Retourne l'image à afficher avec la position de son point topleft et son layer*/
     abstract class BaseDisplayer
     {
+        char[,,,] img; //[x,y,data, frame] :    [x,y,0,#] : caractere
+                       //                [x,y,1,#] : couleur lettre
+                       //                [x,y,2,#] : couleur background
+        WorldObject me;
+        void display()
+        {
 
+        }
     }
     class GeneralDisplayer : BaseDisplayer
     {
 
     }
-
 }
