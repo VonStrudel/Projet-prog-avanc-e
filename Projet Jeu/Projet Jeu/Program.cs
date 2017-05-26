@@ -10,13 +10,34 @@ namespace Projet_Jeu
     {
         static void Main(string[] args)
         {
-            WorldObject wo = new WorldObject();
-            wo.addListener(dic);
-            wo.addListener(dic);
-        }
-        static void dic(EventRepresenter ev)
-        {
-            Console.WriteLine("a");
+           // Console.CursorVisible = false;
+            // On fait disparaitre les scrollbars en donnant à la console la meme taille que le buffer
+            int WINDOWWIDTH = Console.LargestWindowWidth - 2; //dépend de la taille de l'ecran
+            int WINDOWHEIGHT = Console.LargestWindowHeight - 2;
+            Console.SetWindowSize(WINDOWWIDTH, WINDOWHEIGHT);
+            Console.BufferWidth = WINDOWWIDTH;
+            Console.BufferHeight = WINDOWHEIGHT;
+            Console.Clear();
+            Console.OutputEncoding = System.Text.Encoding.Unicode;
+
+            World w = new World();
+            WorldThing wt = new WorldThing(ObjectType.player, new GamePosition(0, 0, 0, direction.right), w);
+            PlayerController c = new PlayerController();
+            w.addListener(c.onKeyPress);
+            BaseDisplayer d = new BaseDisplayer('x', (char)0, (char)1);
+            PlayerPhysics p = new Projet_Jeu.PlayerPhysics();
+            PlayerGameplay g = new Projet_Jeu.PlayerGameplay();
+            wt.controller = c;
+            wt.displayer = d;
+            wt.gameplay = g;
+            wt.physics = p;
+            Console.WriteLine(wt.makeConnections());
+
+            while (true)
+            {
+                w.update();
+                w.display();
+            }
         }
     }
 
@@ -28,15 +49,5 @@ namespace Projet_Jeu
     
 
 
-    /*Comportement graphique de l'objet (affichage)*/
-    /*Retourne l'image à afficher avec la position de son point topleft et son layer*/
-    abstract class BaseDisplayer
-    {
-
-    }
-    class GeneralDisplayer : BaseDisplayer
-    {
-
-    }
 
 }

@@ -51,9 +51,9 @@ namespace Projet_Jeu
         }
         public override string ToString()
         {
-            return "x:" + this.x + " y:" + this.y;
+            return this.x + " :" + this.y;
         }
-        public Vect2D Copy(Vect2D p)
+        public Vect2D Copy()
         {
             return new Vect2D(this.x, this.y);
         }

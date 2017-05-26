@@ -22,5 +22,9 @@ namespace Projet_Jeu
             this.layer = layer;
             this.orientation = or;
         }
+        public override string ToString()
+        {
+            return this.pos + "l" + layer + "d" + orientation;
+        }
     }
 }

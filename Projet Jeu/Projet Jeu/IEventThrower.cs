@@ -10,7 +10,7 @@ namespace Projet_Jeu
      * exemple : une porte pourrait s'inscrire à tous les events "die" des objets du niveau : elle pourrait compter les morts et ne s'ouvrir
      * qu'a partir d'un certain nombre
      */
-    delegate void eventListener(EventRepresenter ev);
+  /*  delegate void eventListener(EventRepresenter ev);
     class EventRepresenter //Represente un evenement
     {
         int objectId;
@@ -23,5 +23,5 @@ namespace Projet_Jeu
         void addListener(eventListener evL);
         void removeListener(); // à préciser
         void throwEvent(EventRepresenter ev);
-    }
+    }*/
 }

@@ -20,26 +20,37 @@ namespace Projet_Jeu
     /*Base de tous les objets*/
     class WorldObject
     {
-        public static int count { get; private set; } // Nombre total d'objets (pour avoir leur id )
-        public int id { get; private set; } //Id de l'objet
-        public ObjectType type { get; private set; } // Ce qu'est l'objet (une porte, un monstre, le joueur?..)
-        public GamePosition pos { get; private set; } // La position instantannée de l'objet dans le niveau
-        public GamePosition startPos { get; private set; } //Position de l'objet à sa création
-        public World world { get; private set; } //Monde dans le quel cet objet est contenu
-
+        public bool hasChanged;
+        public static int count { get; protected set; } // Nombre total d'objets (pour avoir leur id )
+        public int id { get; protected set; } //Id de l'objet
+        public ObjectType type { get; protected set; } // Ce qu'est l'objet (une porte, un monstre, le joueur?..)
+        public GamePosition pos { get; protected set; } // La position instantannée de l'objet dans le niveau
+        public GamePosition startPos { get; protected set; } //Position de l'objet à sa création
+        private World _world;
+        public World world {
+            get { return this._world; }
+            set { this._world = value;
+                this._world.level[pos.pos.x, pos.pos.y] = this;
+            }
+        } //Monde dans le quel cet objet est contenu
+        public BaseDisplayer displayer;//Le Displayer (l'affichage)
         public WorldObject(ObjectType type, GamePosition startPos, World world)
         {
+            //this.hasChanged = true;
             WorldObject.count++;
             this.type = type;
             this.pos = startPos;
             this.startPos = startPos;
             this.world = world;
+
         }
         public WorldObject(ObjectType type, int x, int y, int layer, direction orientation, World world) : this(type, new GamePosition(x, y, layer, orientation), world)
         { }
         public WorldObject():this(ObjectType.unknown,0,0,0,(direction)0, new World())
         { }
-
+        public virtual void update()
+        { 
+        }
         public virtual void onCollide(WorldObject obj, Vect2D direction) 
         {
 
@@ -54,15 +65,12 @@ namespace Projet_Jeu
         }
     }
     /*Objet plus pratique à manipuler*/
-    class WorldThing :WorldObject, IEventThrower
+    class WorldThing :WorldObject
     {
         /*Composition de l'objet*/
-        public BaseController controller;// Le controlleur (le cerveau)
-        public BaseDisplayer displayer;//Le Displayer (l'affichage)
+        public BaseController controller;// Le controleur (le cerveau)
         public BaseGameplay gameplay;//Le gameplay (tout ce qui gere vie, inventaire, status, comment l'entité se déplace, etc...)
         public BasePhysics physics; //La physique (le comportement physique de l'objet en relation avec les autres objets)
-
-
         /*
             update() : 
             demande à component ce qu'il doit faire
@@ -83,14 +91,32 @@ namespace Projet_Jeu
                 return true;
             return false;
         }
+        public bool makeConnections()
+        {
+            if (this.isComplete())
+            {
+                this.controller.gMove += this.gameplay.move;
+                this.controller.world = this.world;
+                //this.controller.gTurn += this.gameplay.
+                this.gameplay.pMove += this.physics.move;
+                this.physics.checkForCollision += this.world.collisionCheck;
+                this.physics.pos = this.pos;
+                this.displayer.me = this;
+                return true;
+            }
+            return false;
+        }
+        public override void update()
+        {
+            physics.update();
+            if (physics.pos != this.pos)
+            {
+                world.move(this, physics.pos);
+                this.pos = physics.pos;
+            }
+            controller.update();
+            //gameplay.update();
+        }
 
-
-        void display() { }
-
-        //Implémentation de IEventThrower
-        public event eventListener evListeners; // Liste des fonctions qui ecoutent les events de cet objet
-        public void addListener(eventListener evL) { evListeners += evL; }
-        public void removeListener() { }
-        public void throwEvent(EventRepresenter ev) { }
     }
 }

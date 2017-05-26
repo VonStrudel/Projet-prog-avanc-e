@@ -9,7 +9,7 @@ namespace Projet_Jeu
     class mystery { }
     enum direction { up=0, down=1, left=2, right=3}
     enum ActionType { move, turn, openInventory, interact, useItem }
-
+    
     delegate void GameplayMove(direction dir);//Pour se déplacer dans une direction (zqsd)
     delegate void GameplayTurn(direction dir);//Pour s'orienter dans une direction (haut bas gauche droite)
     delegate Inventory GameplayGetInventory();//Retourne l'inventaire, et permet au controlleur de faire des trucs dedans
@@ -22,13 +22,22 @@ namespace Projet_Jeu
     abstract class BaseController
     {
         public  GameplayMove gMove;
-        protected  GameplayTurn gTurn;
-        protected  GameplayGetInventory gGetInv;
-        protected  GameplayInteract gInteract;
-        protected  GameplayUseItem gUseItem;
+        public GameplayTurn gTurn;
+        public GameplayGetInventory gGetInv;
+        public GameplayInteract gInteract;
+        public GameplayUseItem gUseItem;
+        private World _world;
+        public World world
+        {
+            get { return this._world; }
+            set { this._world = value; }
+            }
         public abstract void onInteract(WorldObject obj);
         public abstract void update();
+        public BaseController()
+        {
 
+        }
     }
 
     /// <summary>
@@ -53,6 +62,7 @@ namespace Projet_Jeu
             this.value = 0;
         }
     }
+
     /// <summary>
     /// Controleur de joueur : pas d'ia, récupere les touches clavier, et est relié directement au GUI
     /// </summary>
@@ -60,19 +70,20 @@ namespace Projet_Jeu
     {
         public Dictionary<ConsoleKey, ControllerAction> keyboardAssignment;
 
-        void setDefaultDictionary()
+        
+        public void setDefaultDictionary()
         {
-            keyboardAssignment = new Dictionary<ConsoleKey, ControllerAction>();
-            keyboardAssignment.Add(ConsoleKey.UpArrow, new ControllerAction(ActionType.turn, (int)direction.up));
-            keyboardAssignment.Add(ConsoleKey.DownArrow, new ControllerAction(ActionType.turn, (int)direction.down));
-            keyboardAssignment.Add(ConsoleKey.LeftArrow, new ControllerAction(ActionType.turn, (int)direction.left));
-            keyboardAssignment.Add(ConsoleKey.RightArrow, new ControllerAction(ActionType.turn, (int)direction.right));
-            keyboardAssignment.Add(ConsoleKey.Z, new ControllerAction(ActionType.move, (int)direction.up));
-            keyboardAssignment.Add(ConsoleKey.S, new ControllerAction(ActionType.move, (int)direction.down));
-            keyboardAssignment.Add(ConsoleKey.Q, new ControllerAction(ActionType.move, (int)direction.left));
-            keyboardAssignment.Add(ConsoleKey.D, new ControllerAction(ActionType.move, (int)direction.right));
-            keyboardAssignment.Add(ConsoleKey.E, new ControllerAction(ActionType.interact, 0));
-            keyboardAssignment.Add(ConsoleKey.I, new ControllerAction(ActionType.openInventory, 0));
+            this.keyboardAssignment = new Dictionary<ConsoleKey, ControllerAction>();
+            this.keyboardAssignment.Add(ConsoleKey.UpArrow, new ControllerAction(ActionType.turn, (int)direction.up));
+            this.keyboardAssignment.Add(ConsoleKey.DownArrow, new ControllerAction(ActionType.turn, (int)direction.down));
+            this.keyboardAssignment.Add(ConsoleKey.LeftArrow, new ControllerAction(ActionType.turn, (int)direction.left));
+            this.keyboardAssignment.Add(ConsoleKey.RightArrow, new ControllerAction(ActionType.turn, (int)direction.right));
+            this.keyboardAssignment.Add(ConsoleKey.Z, new ControllerAction(ActionType.move, (int)direction.up));
+            this.keyboardAssignment.Add(ConsoleKey.S, new ControllerAction(ActionType.move, (int)direction.down));
+            this.keyboardAssignment.Add(ConsoleKey.Q, new ControllerAction(ActionType.move, (int)direction.left));
+            this.keyboardAssignment.Add(ConsoleKey.D, new ControllerAction(ActionType.move, (int)direction.right));
+            this.keyboardAssignment.Add(ConsoleKey.E, new ControllerAction(ActionType.interact, 0));
+            this.keyboardAssignment.Add(ConsoleKey.I, new ControllerAction(ActionType.openInventory, 0));
 
         }
         public override void onInteract(WorldObject obj)
@@ -82,26 +93,38 @@ namespace Projet_Jeu
         public override void update()
         {
         }
-        void onKeyPress(ConsoleKey cKey)
+        public PlayerController():base()
         {
-            ControllerAction whatDo = keyboardAssignment[cKey];
-            switch(whatDo.action)
+            this.setDefaultDictionary();
+        }
+        public void onKeyPress(ConsoleKey cKey)
+        {
+            try
             {
-                case ActionType.move:
-                    gMove((direction)whatDo.value);
-                    break;
-                case ActionType.turn:
-                    gTurn((direction)whatDo.value);
-                    break;
-                case ActionType.openInventory:
-                    gGetInv();//faudra gérer l'ouverture d'un gui
-                    break;
-                case ActionType.interact:
-                    gInteract();
-                    break;
-                case ActionType.useItem:
-                    gUseItem(whatDo.value);//ca sera gameplay qui s'occupera de regarder la position et l'orientation du joueur
-                    break;
+                ControllerAction whatDo = keyboardAssignment[cKey];
+                
+                switch (whatDo.action)
+                {
+                    case ActionType.move:
+                        
+                        gMove((direction)whatDo.value);
+                        break;
+                    case ActionType.turn:
+                        gTurn((direction)whatDo.value);
+                        break;
+                    case ActionType.openInventory:
+                        gGetInv();//faudra gérer l'ouverture d'un gui
+                        break;
+                    case ActionType.interact:
+                        gInteract();
+                        break;
+                    case ActionType.useItem:
+                        gUseItem(whatDo.value);//ca sera gameplay qui s'occupera de regarder la position et l'orientation du joueur
+                        break;
+                }
+            }
+            catch(Exception e)
+            { //Mauvaise touche
             }
         }
     }

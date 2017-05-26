@@ -10,7 +10,6 @@ namespace Projet_Jeu
     {
         Vect2D p1;
         Vect2D p2;
-        
         Vect2D topLeft
         {
             get
@@ -81,35 +80,38 @@ namespace Projet_Jeu
     /// <summary>
     /// Comportement physique du worldObject.
     /// </summary>
-    abstract class BasePhysics
+    class BasePhysics
     {
         int speed;//Nombre de tics entre chaque mouvement
         int actualTime;//Nombre de tics actuels
         public collisionChecker checkForCollision; // ca sera une fonction de world
-        public WorldObject me;
-        public GamePosition pos
-        {
-            get { return me.pos; }
-        }
+        public GamePosition pos;
         public void update()
         {
-            actualTime++;
+            actualTime++; 
+
+        }
+        public BasePhysics()
+        {
+            this.speed = 10;
         }
         public virtual GamePosition move(Vect2D dir)
         {
-            if(actualTime >= speed) //on peut bouger
+            if (actualTime >= speed) //on peut bouger
             {
+
                 actualTime = 0;
                 GamePosition collision = checkForCollision(this, dir); //on regarde si y'a une collision ou pas. Si y'en a une on a sa position
-                if(collision != null)
+                if (collision != null)
                 {
-                    me.pos.pos = collision.pos - dir.normalize(); //on place l'objet un "bloc" avant la collision
+                    pos.pos = collision.pos - dir.normalize(); //on place l'objet un "bloc" avant la collision
                 }
                 else
                 {
-                    me.pos.pos += dir;
+                    pos.pos += dir;
                 }
             }
+           
             return new GamePosition(new Vect2D(0, 0), 0, (direction)0);
         }
         public virtual GamePosition teleport(GamePosition pos)

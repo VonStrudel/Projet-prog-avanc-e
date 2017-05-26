@@ -10,17 +10,18 @@ namespace Projet_Jeu
     delegate GamePosition PhysicsChangeLayer(int newLayer);
     abstract class BaseGameplay
     {
-        protected PhysicsMove pMove;
-        protected PhysicsTeleport pTeleport;
-        protected PhysicsChangeLayer pChangeLayer;
-
+        public PhysicsMove pMove;
+        public PhysicsMove pTurn;
+        public PhysicsTeleport pTeleport;
+        public PhysicsChangeLayer pChangeLayer;
         public virtual void move(direction dir)
         {
+            
             Vect2D directionVector;
             switch(dir)
             {
                 case direction.up:
-                    directionVector = new Vect2D(0, 1);
+                    directionVector = new Vect2D(0, 1); 
                     break;
                 case direction.down:
                     directionVector = new Vect2D(0, -1);
@@ -35,10 +36,9 @@ namespace Projet_Jeu
                     directionVector = new Vect2D(0, 0);
                     break;
             }
+           
             pMove(directionVector);
         }
-
-
     }
     class PlayerGameplay : BaseGameplay
     {
