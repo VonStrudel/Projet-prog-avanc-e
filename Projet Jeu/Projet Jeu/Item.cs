@@ -16,6 +16,7 @@ namespace Projet_Jeu
         int strength;
         string type;
     }
+
     abstract class Item
     {
         private int variable;

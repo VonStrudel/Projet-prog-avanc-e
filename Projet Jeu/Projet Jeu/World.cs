@@ -135,4 +135,85 @@ namespace Projet_Jeu
         public void removeListener() { }
 
     }
+    /// <summary>
+    /// Nouvelle class World en construction. L'autre sera bientot obsolete
+    /// Plus propre, plus logique, mais pas encore parfaite
+    /// </summary>
+    class World_
+    {
+        private int worldLength;
+        private int worldHeight;
+        private List<WorldObject> level;
+        private WorldObject getObjectAt(int x, int y)
+        {
+            for (int i = 0; i < level.Count; i++)
+                if (level[i].pos.pos.x == x && level[i].pos.pos.y == y)
+                    return level[i];
+            return null;
+        }
+        public void AddObject(WorldObject obj)
+        {
+            level.Add(obj);
+        }
+        public void RemoveObject(WorldObject obj) // Doit avoir la référence exacte de l'objet à supprimer
+        {
+            level.Remove(obj);
+        }
+
+        /// <summary>
+        /// Cette fonction s'occupe juste de voir si à une position, il y a une raison potentielle d'etre bloqué (un objet ou les limites du terrain)
+        /// si c'est un objet, il retourne sa composante physique (et si y'a pas de composante physique il retourne null ( un objet sans compôsante physique est comme un fantome))
+        /// si c'est une limite du terrain, il crée un objet temporaire qui se comporte comme un mur
+        /// </summary>
+        /// <param name="p">L'objet qui veut vérifier si y'a pas de collision</param>
+        /// <param name="destination">L'endroit ou il veut aller</param>
+        /// <returns></returns>
+        public virtual BasePhysics collisionCheck(BasePhysics p, Vect2D destination)
+        {
+            Vect2D currentPosCursor = p.pos.pos.Copy();
+            Vect2D normalizedDirection = destination.normalize();
+            for (int i = 0; i < Vect2D.getDistance(destination, new Vect2D(0, 0)); i++)
+            {
+
+                currentPosCursor += normalizedDirection;
+                //On regarde si on est bien dans les boundaries du niveau
+                if (currentPosCursor.x < 0)
+                    return new BasePhysics(-1, currentPosCursor.y, p.pos.layer);
+                else if (currentPosCursor.x > this.worldLength)
+                    return new BasePhysics(this.worldLength, currentPosCursor.y, p.pos.layer);
+                if (currentPosCursor.y < 0)
+                {
+                    return new BasePhysics(currentPosCursor.x,-1, p.pos.layer);
+                }
+                else if (currentPosCursor.y > this.worldHeight)
+                    return new BasePhysics(currentPosCursor.x, this.worldHeight, p.pos.layer);
+
+
+                //Si oui on regarde si là ou on veut aller, il y a déjà un objet (détection de collision très basique)
+                WorldObject collidedObject = getObjectAt(currentPosCursor.x, currentPosCursor.y);
+
+                if (collidedObject != null && collidedObject.pos.layer == p.pos.layer)
+                {
+                    return collidedObject.physics;
+                }
+            }
+            return null; // pas de collision !
+        }
+        /// <summary>
+        /// Update tous les objets updatables du moonde
+        /// </summary>
+        public virtual void update()
+        {
+
+        }
+
+        /// <summary>
+        /// Display tous les objets displayable du mooonde (enfin ceux qui ont changé de tete)
+        /// </summary>
+        public virtual void display()
+        {
+
+        }
+
+    }
 }

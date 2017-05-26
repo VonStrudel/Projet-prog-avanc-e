@@ -21,7 +21,8 @@ namespace Projet_Jeu
             Console.OutputEncoding = System.Text.Encoding.Unicode;
 
             World w = new World();
-            WorldThing wt = new WorldThing(ObjectType.player, new GamePosition(0, 0, 0, direction.right), w);
+            WorldObject wt = new WorldObject(ObjectType.player, new GamePosition(0, 0, 0, direction.right), w);
+            
             PlayerController c = new PlayerController();
             w.addListener(c.onKeyPress);
             BaseDisplayer d = new BaseDisplayer('x', (char)0, (char)1);

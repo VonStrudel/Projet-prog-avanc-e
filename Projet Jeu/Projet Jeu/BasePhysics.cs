@@ -95,6 +95,15 @@ namespace Projet_Jeu
         {
             this.speed = 10;
         }
+        /// <summary>
+        /// Constructeur pour un collider uniquement (utile pour les murs, ou les bords de map)
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        public BasePhysics(int x, int y, int layer)
+        {
+            this.pos = new GamePosition(new Vect2D(x, y), layer, direction.none);
+        }
         public virtual GamePosition move(Vect2D dir)
         {
             if (actualTime >= speed) //on peut bouger
@@ -123,5 +132,9 @@ namespace Projet_Jeu
             return new GamePosition(new Vect2D(0, 0), 0, (direction)0);
         }
     }
-}
 
+
+    class PlayerPhysics : BasePhysics
+    {
+    }
+}

@@ -17,6 +17,7 @@ namespace Projet_Jeu
         monster = 16,
         world = 32
     };
+    public delegate void updater();
     /*Base de tous les objets*/
     class WorldObject
     {
@@ -33,7 +34,10 @@ namespace Projet_Jeu
                 this._world.level[pos.pos.x, pos.pos.y] = this;
             }
         } //Monde dans le quel cet objet est contenu
-        public BaseDisplayer displayer;//Le Displayer (l'affichage)
+
+        public updater onUpdate; //Delegate pour tous les composants ayant besoin de s'update
+
+        /*Constructeurs*/
         public WorldObject(ObjectType type, GamePosition startPos, World world)
         {
             //this.hasChanged = true;
@@ -48,9 +52,7 @@ namespace Projet_Jeu
         { }
         public WorldObject():this(ObjectType.unknown,0,0,0,(direction)0, new World())
         { }
-        public virtual void update()
-        { 
-        }
+
         public virtual void onCollide(WorldObject obj, Vect2D direction) 
         {
 
@@ -63,31 +65,20 @@ namespace Projet_Jeu
         {
 
         }
-    }
-    /*Objet plus pratique à manipuler*/
-    class WorldThing :WorldObject
-    {
-        /*Composition de l'objet*/
-        public BaseController controller;// Le controleur (le cerveau)
-        public BaseGameplay gameplay;//Le gameplay (tout ce qui gere vie, inventaire, status, comment l'entité se déplace, etc...)
-        public BasePhysics physics; //La physique (le comportement physique de l'objet en relation avec les autres objets)
-        /*
-            update() : 
-            demande à component ce qu'il doit faire
-            le passe à gameplay. Demande à gameplay quoi faire (si action physique)
-            le passe à physics. Physics fait les modifications
-        */
 
-        public WorldThing(ObjectType type, GamePosition startPos, World world):base(type, startPos, world)
-        {
-        }   
-        public WorldThing(ObjectType type, int x, int y, int layer, direction orientation, World world):this(type, new GamePosition(x, y, layer, orientation), world)
-        { }
-        public WorldThing():this(ObjectType.unknown,0,0,0,(direction)0, new World())
-        { }
+        /*Composition de l'objet*/
+        public BaseGameplay gameplay;   //Le gameplay (tout ce qui gere vie, inventaire, status, comment l'entité se déplace, etc...) mais aussi ce qui décide de ce que va faire
+                                        //l'objet si un controller est implémenté
+        public BasePhysics physics;     //(facultatif)La physique (le comportement physique de l'objet en relation avec les autres objets)
+                                        //quand implémenté, l'objet physique va vérifier que chaque déplacement effectué par l'objet est possible selon ses regles
+
+        public BaseDisplayer displayer;//(facultatif) Le Displayer gere l'affichage de l'objet
+                                       // il renvoie un objet contenant le tile (l'"image" à afficher) et la position du tile, permettant à l'afficheur du World de savoir quoi
+                                       // afficher où 
+
         public bool isComplete() //Verifie si l'objet possede bien un controller, un displayer, un gameplay et un physics 
         {
-            if (this.controller != null && this.displayer != null && this.gameplay != null && this.physics != null)
+            if (/*this.controller != null &&*/ this.displayer != null && this.gameplay != null && this.physics != null)
                 return true;
             return false;
         }
@@ -95,28 +86,33 @@ namespace Projet_Jeu
         {
             if (this.isComplete())
             {
-                this.controller.gMove += this.gameplay.move;
-                this.controller.world = this.world;
+                //On ajoute les update au delegate
+                //this.onUpdate += this.controller.update;
+                this.onUpdate += this.physics.update;
+
+                //On superpose l'objet physique à l'objet réel
+                this.physics.pos = this.pos;
+
+
+                //this.controller.gMove += this.gameplay.move;
                 //this.controller.gTurn += this.gameplay.
                 this.gameplay.pMove += this.physics.move;
                 this.physics.checkForCollision += this.world.collisionCheck;
-                this.physics.pos = this.pos;
+                
                 this.displayer.me = this;
                 return true;
             }
             return false;
         }
-        public override void update()
+        public void update()
         {
-            physics.update();
+            this.onUpdate();
             if (physics.pos != this.pos)
             {
                 world.move(this, physics.pos);
                 this.pos = physics.pos;
             }
             controller.update();
-            //gameplay.update();
         }
-
     }
 }

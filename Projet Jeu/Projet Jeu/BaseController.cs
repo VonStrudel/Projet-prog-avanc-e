@@ -7,7 +7,7 @@ namespace Projet_Jeu
 {
 
     class mystery { }
-    enum direction { up=0, down=1, left=2, right=3}
+    enum direction { up=0, down=1, left=2, right=3, none = 4}
     enum ActionType { move, turn, openInventory, interact, useItem }
     
     delegate void GameplayMove(direction dir);//Pour se déplacer dans une direction (zqsd)
@@ -26,12 +26,7 @@ namespace Projet_Jeu
         public GameplayGetInventory gGetInv;
         public GameplayInteract gInteract;
         public GameplayUseItem gUseItem;
-        private World _world;
-        public World world
-        {
-            get { return this._world; }
-            set { this._world = value; }
-            }
+
         public abstract void onInteract(WorldObject obj);
         public abstract void update();
         public BaseController()
@@ -41,7 +36,7 @@ namespace Projet_Jeu
     }
 
     /// <summary>
-    /// Contient le type de l'action que le controlleur veut effectuer (bouger, interagir, tourner, utiliser un item)
+    /// Contient le type de l'action que le controller veut effectuer (bouger, interagir, tourner, utiliser un item)
     /// et une variable précisant l'information (direction, numero de l'item)
     /// </summary>
     class ControllerAction
@@ -106,13 +101,13 @@ namespace Projet_Jeu
                 switch (whatDo.action)
                 {
                     case ActionType.move:
-                        
                         gMove((direction)whatDo.value);
                         break;
                     case ActionType.turn:
                         gTurn((direction)whatDo.value);
                         break;
                     case ActionType.openInventory:
+                        //Fonctions du GUI
                         gGetInv();//faudra gérer l'ouverture d'un gui
                         break;
                     case ActionType.interact:
