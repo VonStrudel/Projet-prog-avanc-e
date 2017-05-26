@@ -6,9 +6,9 @@ using System.Text;
 namespace Projet_Jeu
 {
     /*Class représentant le monde (le niveau)*/
-    // GamePosition collisionChecker(BasePhysics myself, Vect2D direction);
-    delegate void keyListener(ConsoleKey ckey);
-    class World 
+    /*// GamePosition collisionChecker(BasePhysics myself, Vect2D direction);
+    
+    class World_
     {
         public WorldObject[,] level { get; set; }
         List<displayData> affichage;
@@ -66,7 +66,7 @@ namespace Projet_Jeu
                 }
             }
         }
-        public World()
+        public World_()
         {
             this.level = new WorldObject[20, 20];
             this.affichage = new List<displayData>();
@@ -133,12 +133,15 @@ namespace Projet_Jeu
         public void removeKeyListener(keyListener toRemove) { this.keyListeners -= toRemove; }
 
 
-    }
+    }*/
+
+
+    delegate void keyListener(ConsoleKey ckey);
     /// <summary>
     /// Nouvelle class World en construction. L'autre sera bientot obsolete
     /// Plus propre, plus logique, mais pas encore parfaite
     /// </summary>
-    class World_
+    class World
     {
         private int worldLength;
         private int worldHeight;
@@ -154,9 +157,16 @@ namespace Projet_Jeu
         public Action updateListeners; //fonctions d'objets qui ont besoin d'etre updaté (les objets qui bougent tous seuls comme les monstres par exemple)
         public void AddObject(WorldObject obj)
         {
-            this.level.Add(obj);
-            if(obj.needUpdate)
-                this.updateListeners += obj.update;
+            bool isIn = false;                      //On verifie que l'instance n'existe qu'une seule fois dans la liste
+            for (int i = 0; i < level.Count; i++)
+                if (level[i] == obj)
+                    isIn = true;
+            if (!isIn)
+            {
+                this.level.Add(obj);
+                if (obj.needUpdate)
+                    this.updateListeners += obj.update;
+            }
         }
         public void RemoveObject(WorldObject obj) // Doit avoir la référence exacte de l'objet à supprimer
         {
@@ -166,7 +176,7 @@ namespace Projet_Jeu
         }
 
         /// <summary>
-        /// Cette fonction s'occupe juste de voir si à une position, il y a une raison potentielle d'etre bloqué (un objet ou les limites du terrain)
+        /// Cette fonction s'occupe juste de voir si à une position, pour un objet, il y a une potentielle collision (un objet ou les limites du terrain)
         /// si c'est un objet, il retourne sa composante physique (et si y'a pas de composante physique il retourne null ( un objet sans compôsante physique est comme un fantome))
         /// si c'est une limite du terrain, il crée un objet temporaire qui se comporte comme un mur
         /// </summary>

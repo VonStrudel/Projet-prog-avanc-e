@@ -8,10 +8,11 @@ namespace Projet_Jeu
     delegate void positionChanger(Vect2D moveVector);
     class BaseGameplay
     {
+        public GamePosition pos;
         /*Appartient au worldObject */
-        public positionChanger moveObject; //delegate permettant au gameplay de bouger son objet (bloc par bloc)
+        public positionChanger moveObject; //delegate permettant au gameplay de bouger son objet (bloc par bloc). Rien n'empeche 
         public positionChanger teleportObject; //delegate permettant une téléportation. C'est une autre fonction car elle gere différement la verification des collision si physique il y a
-
+                                                // une teleportation n'est pas 
         private BaseController _controller;
         public BaseController controller
         {
@@ -36,7 +37,11 @@ namespace Projet_Jeu
         {
             return position;
         }
-        public virtual Vect2D myMove(direction dir)//Fonction overrideable pour modifier le déroulement d'un déplacement
+        public virtual direction myTurn(direction dir)//Fonction overrideable pour modifier le déroulement d'une rotation
+        {
+            return dir;
+        }
+        public virtual void move(direction dir) // Move est directement overrideable pour permettre plus de flexibilité (appeller plusieurs fois moveObject à la suite par exemple)
         {
             Vect2D directionVector;
             switch (dir)
@@ -57,21 +62,13 @@ namespace Projet_Jeu
                     directionVector = new Vect2D(0, 0);
                     break;
             }
-            return directionVector;
+            this.moveObject(directionVector);
         }
-        public virtual direction myTurn(direction dir)//Fonction overrideable pour modifier le déroulement d'une rotation
-        {
-            return dir;
-        }
-       
+
         public void teleport(Vect2D position)
         {
             this.teleportObject(myTeleport(position));
         } 
-        public void move(direction dir)
-        {
-            this.moveObject(myMove(dir)); 
-        }
         public void turn(direction dir) { // à implémenter
         }
     }

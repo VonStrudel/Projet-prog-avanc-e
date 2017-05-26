@@ -76,7 +76,7 @@ namespace Projet_Jeu
         }
 
     }*/
-    delegate GamePosition collisionChecker(BasePhysics myself, Vect2D direction);
+    delegate BasePhysics collisionChecker(BasePhysics myself, Vect2D direction);
     /// <summary>
     /// Comportement physique du worldObject.
     /// </summary>
@@ -85,11 +85,10 @@ namespace Projet_Jeu
         int speed;//Nombre de tics entre chaque mouvement
         int actualTime;//Nombre de tics actuels
         public collisionChecker checkForCollision; // ca sera une fonction de world
-        public GamePosition pos;
+        public GamePosition pos; //Un objet physique possede sa propre position pour etre indépendant de son WorldObject
         public void update()
         {
             actualTime++; 
-
         }
         public BasePhysics()
         {
@@ -104,32 +103,32 @@ namespace Projet_Jeu
         {
             this.pos = new GamePosition(new Vect2D(x, y), layer, direction.none);
         }
-        public virtual GamePosition move(Vect2D dir)
+        public Vect2D checkMove(Vect2D movement)
         {
-            if (actualTime >= speed) //on peut bouger
-            {
+            //verifie si il peut bouger
+            Vect2D newMovement = new Vect2D(0, 0);
+            this.pos.pos += newMovement;
+            return newMovement;
+        }
+        public Vect2D checkTeleportation(Vect2D movement)
+        {
+            //Verifie si il peut se tp là. Si il y a quelque chose, la teleportation ne se fait pas
+            Vect2D newMovement;
+            newMovement = movement;
+            BasePhysics collided = this.checkForCollision(this, movement);
 
-                actualTime = 0;
-                GamePosition collision = checkForCollision(this, dir); //on regarde si y'a une collision ou pas. Si y'en a une on a sa position
-                if (collision != null)
-                {
-                    pos.pos = collision.pos - dir.normalize(); //on place l'objet un "bloc" avant la collision
-                }
-                else
-                {
-                    pos.pos += dir;
-                }
-            }
-           
-            return new GamePosition(new Vect2D(0, 0), 0, (direction)0);
+            newMovement = new Vect2D(0, 0);
+            this.pos.pos += newMovement;
+            return newMovement;
         }
-        public virtual GamePosition teleport(GamePosition pos)
+        public Vect2D onCollide(BasePhysics obj, Vect2D hisTrajectory)
         {
-            return new GamePosition(new Vect2D(0, 0), 0, (direction)0);
+            return new Projet_Jeu.Vect2D(0, 0);
         }
-        public virtual GamePosition changeLayer(int newLayer)
+        public Vect2D onTpCollide(BasePhysics obj, Vect2D hisTrajectory)
         {
-            return new GamePosition(new Vect2D(0, 0), 0, (direction)0);
+
+            return new Projet_Jeu.Vect2D(0, 0);
         }
     }
 

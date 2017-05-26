@@ -20,13 +20,17 @@ namespace Projet_Jeu
             this.img = img;
         }
     }
+    /// <summary>
+    /// Un displayer est la composante graphique d'un objet, elle dit au monde comment afficher l'instance de worldObject
+    /// </summary>
     class BaseDisplayer
-    {
+    {// A completer
         char[,,,] img; //[x,y,data, frame] :    [x,y,0,#] : caractere
                        //                [x,y,1,#] : couleur lettre
                        //                [x,y,2,#] : couleur background
                        //                [#,#,#,enum direction] : frame correspondant à l'orientation
-        public WorldObject me;
+        public bool hasChanged;
+
         public virtual displayData display()
         {
             return new displayData(img, me.pos.pos, (int)me.pos.orientation);

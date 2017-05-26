@@ -21,7 +21,7 @@ namespace Projet_Jeu
     /*Base de tous les objets*/
     class WorldObject
     {
-        public bool hasChanged, hasMoved;
+        public bool hasMoved;
         public bool needUpdate;
         public static int count { get; protected set; } // Nombre total d'objets (pour avoir leur id )
         public int id { get; protected set; } //Id de l'objet
@@ -32,7 +32,7 @@ namespace Projet_Jeu
         public World world {
             get { return this._world; }
             set { this._world = value;
-                this._world.level[pos.pos.x, pos.pos.y] = this;
+                this._world.AddObject(this);
             }
         } //Monde dans le quel cet objet est contenu
 
@@ -81,11 +81,26 @@ namespace Projet_Jeu
              //l'objet si un controller est implémenté
         public void move(Vect2D movement)
         {
-
+            if(this.physics != null)
+            {
+                movement = physics.checkMove(movement);
+            }
+            this.mv(movement);
         }
         public void teleport(Vect2D movement)
         {
-
+            if(this.physics != null)
+            {
+                movement = physics.checkTeleportation(movement);
+            }
+            this.mv(movement);
+        }
+        protected void mv(Vect2D movement)
+        {
+            this.pos.pos += movement; //On déplace tout
+            this.physics.pos.pos += movement;
+            this.displayer.pos.pos += movement;
+            this.gameplay.pos.pos += movement;
         }
 
         public BasePhysics physics;     //(facultatif)La physique (le comportement physique de l'objet en relation avec les autres objets)
@@ -116,8 +131,6 @@ namespace Projet_Jeu
                 //this.controller.gMove += this.gameplay.move;
                 //this.controller.gTurn += this.gameplay.
                 this.physics.checkForCollision += this.world.collisionCheck;
-                
-                this.displayer.me = this;
                 return true;
             }
             return false;
@@ -127,7 +140,6 @@ namespace Projet_Jeu
             this.onUpdate();
             if (physics.pos != this.pos)
             {
-                world.move(this, physics.pos);
                 this.pos = physics.pos;
             }
         }
