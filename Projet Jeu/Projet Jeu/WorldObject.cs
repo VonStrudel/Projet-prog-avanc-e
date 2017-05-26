@@ -21,7 +21,8 @@ namespace Projet_Jeu
     /*Base de tous les objets*/
     class WorldObject
     {
-        public bool hasChanged;
+        public bool hasChanged, hasMoved;
+        public bool needUpdate;
         public static int count { get; protected set; } // Nombre total d'objets (pour avoir leur id )
         public int id { get; protected set; } //Id de l'objet
         public ObjectType type { get; protected set; } // Ce qu'est l'objet (une porte, un monstre, le joueur?..)
@@ -67,15 +68,32 @@ namespace Projet_Jeu
         }
 
         /*Composition de l'objet*/
-        public BaseGameplay gameplay;   //Le gameplay (tout ce qui gere vie, inventaire, status, comment l'entité se déplace, etc...) mais aussi ce qui décide de ce que va faire
-                                        //l'objet si un controller est implémenté
+        private BaseGameplay _gameplay;
+        public BaseGameplay gameplay {
+            get { return this._gameplay; }
+            set {
+                this._gameplay = value;
+                this._gameplay.moveObject = move;
+                this._gameplay.teleportObject = teleport;
+            }
+
+        }   //Le gameplay (tout ce qui gere vie, inventaire, status, comment l'entité se déplace, comment elle réagit, etc...) mais aussi ce qui décide de ce que va faire
+             //l'objet si un controller est implémenté
+        public void move(Vect2D movement)
+        {
+
+        }
+        public void teleport(Vect2D movement)
+        {
+
+        }
+
         public BasePhysics physics;     //(facultatif)La physique (le comportement physique de l'objet en relation avec les autres objets)
                                         //quand implémenté, l'objet physique va vérifier que chaque déplacement effectué par l'objet est possible selon ses regles
-
         public BaseDisplayer displayer;//(facultatif) Le Displayer gere l'affichage de l'objet
                                        // il renvoie un objet contenant le tile (l'"image" à afficher) et la position du tile, permettant à l'afficheur du World de savoir quoi
                                        // afficher où 
-
+        //Obsolete
         public bool isComplete() //Verifie si l'objet possede bien un controller, un displayer, un gameplay et un physics 
         {
             if (/*this.controller != null &&*/ this.displayer != null && this.gameplay != null && this.physics != null)
@@ -87,16 +105,16 @@ namespace Projet_Jeu
             if (this.isComplete())
             {
                 //On ajoute les update au delegate
-                //this.onUpdate += this.controller.update;
-                this.onUpdate += this.physics.update;
-
-                //On superpose l'objet physique à l'objet réel
-                this.physics.pos = this.pos;
+                if (this.physics != null)
+                {
+                    this.onUpdate += this.physics.update;
+                    //On superpose l'objet physique à l'objet réel
+                    this.physics.pos = this.pos;
+                }
 
 
                 //this.controller.gMove += this.gameplay.move;
                 //this.controller.gTurn += this.gameplay.
-                this.gameplay.pMove += this.physics.move;
                 this.physics.checkForCollision += this.world.collisionCheck;
                 
                 this.displayer.me = this;
@@ -112,7 +130,6 @@ namespace Projet_Jeu
                 world.move(this, physics.pos);
                 this.pos = physics.pos;
             }
-            controller.update();
         }
     }
 }

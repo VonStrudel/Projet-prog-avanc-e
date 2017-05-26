@@ -9,14 +9,20 @@ namespace Projet_Jeu
     class mystery { }
     enum direction { up=0, down=1, left=2, right=3, none = 4}
     enum ActionType { move, turn, openInventory, interact, useItem }
-    
+    /*Delegate donnant au controlleur le controle de l'objet*/
+    //Modes de déplacement
     delegate void GameplayMove(direction dir);//Pour se déplacer dans une direction (zqsd)
+    delegate void GameplayTeleport(Vect2D destination);//Pour se téléporter
     delegate void GameplayTurn(direction dir);//Pour s'orienter dans une direction (haut bas gauche droite)
+
+    //gestion de l'inventaire
     delegate Inventory GameplayGetInventory();//Retourne l'inventaire, et permet au controlleur de faire des trucs dedans
     delegate void GameplayEquipItem(Item item);//Permet au controlleur d'équiper un item
-    delegate void GameplayInteract();//Interagit avec l'objet en face de nous
     delegate void GameplayUseItem(int slotId);//Utilise le slotId eme item équipé
-    /// <summary>
+    
+    //Divers
+    delegate void GameplayInteract();//Interagit avec l'objet en face de nous
+        /// <summary>
     /// Controlleur du worldObject. Le "cerveau"
     /// </summary>
     abstract class BaseController
@@ -26,7 +32,7 @@ namespace Projet_Jeu
         public GameplayGetInventory gGetInv;
         public GameplayInteract gInteract;
         public GameplayUseItem gUseItem;
-
+        public GameplayTeleport gTeleport;
         public abstract void onInteract(WorldObject obj);
         public abstract void update();
         public BaseController()

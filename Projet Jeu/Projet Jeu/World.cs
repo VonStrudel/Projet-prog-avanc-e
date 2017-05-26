@@ -129,10 +129,9 @@ namespace Projet_Jeu
                 }
             }
         }
-        //Gestion du systeme d'"évenement"
-        //(les entrées clavier)
         public void addListener(keyListener evL) { this.keyListeners += evL; }
-        public void removeListener() { }
+        public void removeKeyListener(keyListener toRemove) { this.keyListeners -= toRemove; }
+
 
     }
     /// <summary>
@@ -151,13 +150,19 @@ namespace Projet_Jeu
                     return level[i];
             return null;
         }
+        public keyListener keyListeners; //fonction d'objets qui attendent des entrées claviers
+        public Action updateListeners; //fonctions d'objets qui ont besoin d'etre updaté (les objets qui bougent tous seuls comme les monstres par exemple)
         public void AddObject(WorldObject obj)
         {
-            level.Add(obj);
+            this.level.Add(obj);
+            if(obj.needUpdate)
+                this.updateListeners += obj.update;
         }
         public void RemoveObject(WorldObject obj) // Doit avoir la référence exacte de l'objet à supprimer
         {
             level.Remove(obj);
+            if (obj.needUpdate)
+                this.updateListeners -= obj.update;
         }
 
         /// <summary>
@@ -200,20 +205,30 @@ namespace Projet_Jeu
             return null; // pas de collision !
         }
         /// <summary>
-        /// Update tous les objets updatables du moonde
+        /// Update tous les objets updatables du mooonde
         /// </summary>
         public virtual void update()
         {
+            if(Console.KeyAvailable)//On donne les entrées clavier à ceux qui les demandent
+                this.keyListeners(Console.ReadKey().Key);
+            this.updateListeners();
 
         }
 
         /// <summary>
-        /// Display tous les objets displayable du mooonde (enfin ceux qui ont changé de tete)
+        /// Display tous les objets displayable du mooonde (enfin ceux qui ont changé d'apparence pour pas clignoter trop)
         /// </summary>
         public virtual void display()
         {
 
         }
+        /// <summary>
+        /// Ajout de fonctions qui "écoutent" les entrées clavier
+        /// </summary>
+        /// <param name="evL"></param>
+        public void addKeyListener(keyListener evL) { this.keyListeners += evL; }
+        public void removeKeyListener(keyListener toRemove) { this.keyListeners -= toRemove; }
 
+        
     }
 }

@@ -27,10 +27,10 @@ namespace Projet_Jeu
             w.addListener(c.onKeyPress);
             BaseDisplayer d = new BaseDisplayer('x', (char)0, (char)1);
             PlayerPhysics p = new Projet_Jeu.PlayerPhysics();
-            PlayerGameplay g = new Projet_Jeu.PlayerGameplay();
-            wt.controller = c;
+            BaseGameplay g = new Projet_Jeu.BaseGameplay();
             wt.displayer = d;
             wt.gameplay = g;
+            wt.gameplay.controller = c;
             wt.physics = p;
             Console.WriteLine(wt.makeConnections());
 

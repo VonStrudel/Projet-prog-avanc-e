@@ -5,16 +5,13 @@ using System.Text;
 
 namespace Projet_Jeu
 {
-    delegate GamePosition PhysicsMove(Vect2D dir);
-    delegate GamePosition PhysicsTeleport(GamePosition pos);
-    delegate GamePosition PhysicsChangeLayer(int newLayer);
-
-    abstract class BaseGameplay
+    delegate void positionChanger(Vect2D moveVector);
+    class BaseGameplay
     {
-        public PhysicsMove pMove;
-        public PhysicsMove pTurn;
-        public PhysicsTeleport pTeleport;
-        public PhysicsChangeLayer pChangeLayer;
+        /*Appartient au worldObject */
+        public positionChanger moveObject; //delegate permettant au gameplay de bouger son objet (bloc par bloc)
+        public positionChanger teleportObject; //delegate permettant une téléportation. C'est une autre fonction car elle gere différement la verification des collision si physique il y a
+
         private BaseController _controller;
         public BaseController controller
         {
@@ -26,16 +23,22 @@ namespace Projet_Jeu
             {
                 this._controller = value;           //Le controller peut :
                 this._controller.gMove = this.move; //faire bouger l'objet
+                this._controller.gTeleport = this.teleport; //faire se téléporter l'objet
                 this._controller.gTurn = this.turn; //faire tourner l'objet
                 //this._controller.gGetInv = this.; //récuperer l'inventaire (NON IMPLEMENTÉ)
                 //this._controller.gEquipItem = this.; //equiper un item (NON IMPLEMENTÉ)
                 //this._controller.gUseItem = this.;//utiliser un item équipé (NON IMPLEMENTÉ)
             }
         }
-        public virtual void move(direction dir)
-        {
 
-           /* Vect2D directionVector;
+
+        public virtual Vect2D myTeleport(Vect2D position) //Fonction overrideable pour modifier le déroulement d'une téléportation
+        {
+            return position;
+        }
+        public virtual Vect2D myMove(direction dir)//Fonction overrideable pour modifier le déroulement d'un déplacement
+        {
+            Vect2D directionVector;
             switch (dir)
             {
                 case direction.up:
@@ -53,14 +56,24 @@ namespace Projet_Jeu
                 default:
                     directionVector = new Vect2D(0, 0);
                     break;
-                    pMove(directionVector);
-            }*/
+            }
+            return directionVector;
         }
-        public virtual void turn(direction dir) { }
-    }
-    class PlayerGameplay : BaseGameplay
-    {
-
+        public virtual direction myTurn(direction dir)//Fonction overrideable pour modifier le déroulement d'une rotation
+        {
+            return dir;
+        }
+       
+        public void teleport(Vect2D position)
+        {
+            this.teleportObject(myTeleport(position));
+        } 
+        public void move(direction dir)
+        {
+            this.moveObject(myMove(dir)); 
+        }
+        public void turn(direction dir) { // à implémenter
+        }
     }
 }
 /*
