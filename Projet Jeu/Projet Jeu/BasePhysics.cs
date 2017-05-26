@@ -123,18 +123,5 @@ namespace Projet_Jeu
             return new GamePosition(new Vect2D(0, 0), 0, (direction)0);
         }
     }
-    class PlayerPhysics : BasePhysics
-    {
-
-    }
-    class WallPhysics : BasePhysics
-    {
-
-    }
 }
 
-/*
-     delegate GamePosition PhysicsMove(Vect2D dir);
-    delegate GamePosition PhysicsTeleport(GamePosition pos);
-    delegate GamePosition PhysicsChangeLayer(int newLayer);
-     */
