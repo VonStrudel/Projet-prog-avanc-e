@@ -54,18 +54,7 @@ namespace Projet_Jeu
         public WorldObject():this(ObjectType.unknown,0,0,0,(direction)0, new World())
         { }
 
-        public virtual void onCollide(WorldObject obj, Vect2D direction) 
-        {
 
-        }
-        public virtual void onReceive(Attack atk, WorldObject obj)
-        {
-
-        }
-        public virtual void onInteract(Interaction i, WorldObject obj)
-        {
-
-        }
 
         /*Composition de l'objet*/
         private BaseGameplay _gameplay;
@@ -78,15 +67,53 @@ namespace Projet_Jeu
             }
 
         }   //Le gameplay (tout ce qui gere vie, inventaire, status, comment l'entité se déplace, comment elle réagit, etc...) mais aussi ce qui décide de ce que va faire
-             //l'objet si un controller est implémenté
-        public void move(Vect2D movement)
+            //l'objet si un controller est implémenté
+       
+        public virtual void onCollide(WorldObject obj)
         {
-            if(this.physics != null)
+            if (this.gameplay != null)
+                this.gameplay.onCollide(this.gameplay);
+        }
+        public virtual void onReceive(Attack atk, WorldObject obj)
+        {
+            if (this.gameplay != null)
+                this.gameplay.receive(atk, obj.gameplay);
+        }
+        public virtual void onInteract(Interaction i, WorldObject obj)
+        {
+            if (this.gameplay != null)
+                this.gameplay.interact(i, obj.gameplay);
+        }
+
+        public BasePhysics physics;     //(facultatif)La physique (le comportement physique de l'objet en relation avec les autres objets)
+                                        //quand implémenté, l'objet physique va vérifier que chaque déplacement effectué par l'objet est possible selon ses regles
+        /// <summary>
+        /// Move est un déplacement en ligne droite : 
+        /// Si un objet est sur le chemin, il est heurté (onCollide) et bloque le déplacement (enfin ca dépend du comportement de sa composante physique)
+        /// </summary>
+        /// <param name="movement"></param>
+        public void move(Vect2D movement) //Cette fonction fait trop de trucs : faudrait rapatrier tout ce qui touche aux rebonds dans le physics, le laisser vivre sa vie, et gérer la dimension "gameplay" des collisions uniquement à chaque updates
+        {
+            //On regarde si on va collider avec quelque chose
+            if (this.physics != null) //Si y'a une composante physique on peut checker les collisions
             {
-                movement = physics.checkMove(movement);
+                WorldObject collided = world.getCollidedObject(this.physics, movement);
+                while (collided != null) //On utilise une boucle au cas ou il y aurait des rebonds menant à d'autres collisions
+                {
+                    this.onCollide(collided); //Je fais mon action vers l'objet heurté
+                    collided.onCollide(this); //L'objet heurté fait son action (les collision vont dans les deux sens, principe d'action réaction)
+
+                    movement += physics.resolveCollision(collided.physics, movement); //On laisse l'objet physics gérer l'influence de la collision sur les déplacements
+                    collided = world.getCollidedObject(this.physics, movement); 
+                }
             }
             this.mv(movement);
         }
+        /// <summary>
+        /// Teleport est  un déplacement instantanné, il ne fait pas attention aux objets sur la route. Si il y a un objet à la position ou la téléportation est voulue,
+        /// la collision est gérée par les objets physics
+        /// </summary>
+        /// <param name="movement"></param>
         public void teleport(Vect2D movement)
         {
             if(this.physics != null)
@@ -94,7 +121,19 @@ namespace Projet_Jeu
                 movement = physics.checkTeleportation(movement);
             }
             this.mv(movement);
+            if(this.physics != null)
+            {
+                WorldObject collided = world.getObjectAt(this.physics.pos.pos.x, this.physics.pos.pos.y); //On regarde si on s'est tp sur quelque chose
+                if (collided != null)
+                {
+
+                    this.onCollide(collided); //Je fais mon action vers l'objet heurté
+                    collided.onCollide(this); //L'objet heurté fait son action (les collision vont dans les deux sens, principe d'action réaction)
+                }
+            }
         }
+
+        //S'occupe de bouger l'objet
         protected void mv(Vect2D movement)
         {
             this.pos.pos += movement; //On déplace tout
@@ -103,45 +142,20 @@ namespace Projet_Jeu
             this.gameplay.pos.pos += movement;
         }
 
-        public BasePhysics physics;     //(facultatif)La physique (le comportement physique de l'objet en relation avec les autres objets)
-                                        //quand implémenté, l'objet physique va vérifier que chaque déplacement effectué par l'objet est possible selon ses regles
+
         public BaseDisplayer displayer;//(facultatif) Le Displayer gere l'affichage de l'objet
                                        // il renvoie un objet contenant le tile (l'"image" à afficher) et la position du tile, permettant à l'afficheur du World de savoir quoi
                                        // afficher où 
-        //Obsolete
-        public bool isComplete() //Verifie si l'objet possede bien un controller, un displayer, un gameplay et un physics 
-        {
-            if (/*this.controller != null &&*/ this.displayer != null && this.gameplay != null && this.physics != null)
-                return true;
-            return false;
-        }
-        public bool makeConnections()
-        {
-            if (this.isComplete())
-            {
-                //On ajoute les update au delegate
-                if (this.physics != null)
-                {
-                    this.onUpdate += this.physics.update;
-                    //On superpose l'objet physique à l'objet réel
-                    this.physics.pos = this.pos;
-                }
-
-
-                //this.controller.gMove += this.gameplay.move;
-                //this.controller.gTurn += this.gameplay.
-                this.physics.checkForCollision += this.world.collisionCheck;
-                return true;
-            }
-            return false;
-        }
+        
         public void update()
         {
             this.onUpdate();
-            if (physics.pos != this.pos)
-            {
-                this.pos = physics.pos;
-            }
+            //TODO :    on checke les collisions 
+            //          on utilise gameplay.oncollide
+            //          (du coup on risquerait pas de rebondir et se blesser plusieurs fois entre deux updates)
+            //          (et ca rendrait tout un peu moins sale)
+            //
+            //          implémenter le concept de "vitesse" 
         }
     }
 }

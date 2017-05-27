@@ -145,8 +145,9 @@ namespace Projet_Jeu
     {
         private int worldLength;
         private int worldHeight;
-        private List<WorldObject> level;
-        private WorldObject getObjectAt(int x, int y)
+        private List<WorldObject> level; //Tous les objets du niveau
+        private List<WorldObject> displayable; //Tous les objets affichages (qui ont un displayer déclaré)
+        public WorldObject getObjectAt(int x, int y)
         {
             for (int i = 0; i < level.Count; i++)
                 if (level[i].pos.pos.x == x && level[i].pos.pos.y == y)
@@ -164,6 +165,8 @@ namespace Projet_Jeu
             if (!isIn)
             {
                 this.level.Add(obj);
+                if (obj.displayer != null)
+                    this.displayable.Add(obj);
                 if (obj.needUpdate)
                     this.updateListeners += obj.update;
             }
@@ -185,34 +188,41 @@ namespace Projet_Jeu
         /// <returns></returns>
         public virtual BasePhysics collisionCheck(BasePhysics p, Vect2D destination)
         {
-            Vect2D currentPosCursor = p.pos.pos.Copy();
+            
+          
+
+            //On regarde si on est bien dans les boundaries du niveau
+            if (destination.x < 0)
+                return new BasePhysics(-1, destination.y, p.pos.layer);
+            else if (destination.x > this.worldLength)
+                return new BasePhysics(this.worldLength, destination.y, p.pos.layer);
+            if (destination.y < 0)
+            {
+                return new BasePhysics(destination.x, -1, p.pos.layer);
+            }
+            else if (destination.y > this.worldHeight)
+                return new BasePhysics(destination.x, this.worldHeight, p.pos.layer);
+            WorldObject collided = getCollidedObject(p, destination);
+            if (collided != null)
+                return collided.physics;
+            return null; // pas de collision !
+        }
+        public WorldObject getCollidedObject(BasePhysics p, Vect2D destination)
+        {
             Vect2D normalizedDirection = destination.normalize();
+            Vect2D currentPosCursor = p.pos.pos.Copy();
             for (int i = 0; i < Vect2D.getDistance(destination, new Vect2D(0, 0)); i++)
             {
-
                 currentPosCursor += normalizedDirection;
-                //On regarde si on est bien dans les boundaries du niveau
-                if (currentPosCursor.x < 0)
-                    return new BasePhysics(-1, currentPosCursor.y, p.pos.layer);
-                else if (currentPosCursor.x > this.worldLength)
-                    return new BasePhysics(this.worldLength, currentPosCursor.y, p.pos.layer);
-                if (currentPosCursor.y < 0)
-                {
-                    return new BasePhysics(currentPosCursor.x,-1, p.pos.layer);
-                }
-                else if (currentPosCursor.y > this.worldHeight)
-                    return new BasePhysics(currentPosCursor.x, this.worldHeight, p.pos.layer);
-
-
                 //Si oui on regarde si là ou on veut aller, il y a déjà un objet (détection de collision très basique)
                 WorldObject collidedObject = getObjectAt(currentPosCursor.x, currentPosCursor.y);
 
                 if (collidedObject != null && collidedObject.pos.layer == p.pos.layer)
                 {
-                    return collidedObject.physics;
+                    return collidedObject;
                 }
             }
-            return null; // pas de collision !
+            return null;
         }
         /// <summary>
         /// Update tous les objets updatables du mooonde
@@ -227,10 +237,11 @@ namespace Projet_Jeu
 
         /// <summary>
         /// Display tous les objets displayable du mooonde (enfin ceux qui ont changé d'apparence pour pas clignoter trop)
+        /// Cela ne fait appel qu'a la partie Displayer de l'objet
         /// </summary>
         public virtual void display()
         {
-
+            //A implémenter
         }
         /// <summary>
         /// Ajout de fonctions qui "écoutent" les entrées clavier

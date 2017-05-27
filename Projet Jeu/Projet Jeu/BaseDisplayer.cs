@@ -30,10 +30,10 @@ namespace Projet_Jeu
                        //                [x,y,2,#] : couleur background
                        //                [#,#,#,enum direction] : frame correspondant à l'orientation
         public bool hasChanged;
-
+        public GamePosition pos;
         public virtual displayData display()
         {
-            return new displayData(img, me.pos.pos, (int)me.pos.orientation);
+            return new displayData(img, pos.pos, (int)pos.orientation);
         }
         public BaseDisplayer(char c, char col, char back) //tests
         {

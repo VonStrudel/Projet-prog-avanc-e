@@ -103,11 +103,18 @@ namespace Projet_Jeu
         {
             this.pos = new GamePosition(new Vect2D(x, y), layer, direction.none);
         }
-        public Vect2D checkMove(Vect2D movement)
+
+        /// <summary>
+        /// Quand il y a une collision, gere la communication entre les deux objets physics 
+        /// </summary>
+        /// <param name="collided"></param>
+        /// <param name="movement"></param>
+        /// <returns></returns>
+        public Vect2D resolveCollision(BasePhysics collided, Vect2D movement)
         {
             //verifie si il peut bouger
-            Vect2D newMovement = new Vect2D(0, 0);
-            this.pos.pos += newMovement;
+            Vect2D opposedMovement = collided.onCollide(this, movement);
+            Vect2D newMovement = movement - opposedMovement;
             return newMovement;
         }
         public Vect2D checkTeleportation(Vect2D movement)
@@ -117,18 +124,20 @@ namespace Projet_Jeu
             newMovement = movement;
             BasePhysics collided = this.checkForCollision(this, movement);
 
-            newMovement = new Vect2D(0, 0);
-            this.pos.pos += newMovement;
+            if (!collided.onTpCollide(this, movement)) //Est ce que je peux me téléporter dessus?
+                newMovement = new Vect2D(0, 0);
             return newMovement;
         }
-        public Vect2D onCollide(BasePhysics obj, Vect2D hisTrajectory)
+        public virtual Vect2D onCollide(BasePhysics obj, Vect2D hisTrajectory) //Représente la réaction de l'objet quand il subit une collision
         {
-            return new Projet_Jeu.Vect2D(0, 0);
+            Vect2D renvoi = (obj.pos.pos - this.pos.pos).normalize(); //Ici, repousse simplement l'objet à la case d'avant (comportement basique d'un mur)
+            return renvoi;
+            //Il serait possible d'être plus fancy, en déplacant les deux objets impliqués par exemple (action, réaction)
+            //On peut aussi appliquer une réaction inverse
         }
-        public Vect2D onTpCollide(BasePhysics obj, Vect2D hisTrajectory)
+        public virtual bool onTpCollide(BasePhysics obj, Vect2D hisTrajectory) // Si un objet veut se téléporter à la position de celui ci
         {
-
-            return new Projet_Jeu.Vect2D(0, 0);
+            return false;
         }
     }
 

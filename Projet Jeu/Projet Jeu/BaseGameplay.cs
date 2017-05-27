@@ -32,7 +32,25 @@ namespace Projet_Jeu
             }
         }
 
+        public void onCollide(BaseGameplay theOther)
+        {
+            //exemple : 
+            //Attack atk = new Attack();
+            //this.hurt(theOther, atk)
+            //Quand cet objet heurte ou est heurté, il inflige des dégats
+        }
+        public void receive(Attack atk, BaseGameplay g)
+        {
+        }
+        public void interact(Interaction i, BaseGameplay g)
+        {
 
+        }
+        public void hurt(BaseGameplay g, Attack atk)
+        {
+            if(g != null)
+            g.receive(atk, this);
+        }
         public virtual Vect2D myTeleport(Vect2D position) //Fonction overrideable pour modifier le déroulement d'une téléportation
         {
             return position;

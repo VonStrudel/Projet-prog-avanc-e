@@ -6,9 +6,7 @@ using System.Text;
 namespace Projet_Jeu
 {
 
-    class mystery { }
-    enum direction { up=0, down=1, left=2, right=3, none = 4}
-    enum ActionType { move, turn, openInventory, interact, useItem }
+
     /*Delegate donnant au controlleur le controle de l'objet*/
     //Modes de déplacement
     delegate void GameplayMove(direction dir);//Pour se déplacer dans une direction (zqsd)
@@ -22,12 +20,13 @@ namespace Projet_Jeu
     
     //Divers
     delegate void GameplayInteract();//Interagit avec l'objet en face de nous
-        /// <summary>
+    
+    /// <summary>
     /// Controlleur du worldObject. Le "cerveau"
     /// </summary>
     abstract class BaseController
     {
-        public  GameplayMove gMove;
+        public GameplayMove gMove;
         public GameplayTurn gTurn;
         public GameplayGetInventory gGetInv;
         public GameplayInteract gInteract;
@@ -41,6 +40,8 @@ namespace Projet_Jeu
         }
     }
 
+    enum direction { up = 0, down = 1, left = 2, right = 3, none = 4 }
+    enum ActionType { move, turn, openInventory, interact, useItem }
     /// <summary>
     /// Contient le type de l'action que le controller veut effectuer (bouger, interagir, tourner, utiliser un item)
     /// et une variable précisant l'information (direction, numero de l'item)
@@ -70,8 +71,6 @@ namespace Projet_Jeu
     class PlayerController : BaseController
     {
         public Dictionary<ConsoleKey, ControllerAction> keyboardAssignment;
-
-        
         public void setDefaultDictionary()
         {
             this.keyboardAssignment = new Dictionary<ConsoleKey, ControllerAction>();
@@ -98,7 +97,7 @@ namespace Projet_Jeu
         {
             this.setDefaultDictionary();
         }
-        public void onKeyPress(ConsoleKey cKey)
+        public void onKeyPress(ConsoleKey cKey) //Ce controller a la particularité de ne pas avoir besoin d'etre update pour agir : il attend un appui sur une touche
         {
             try
             {
